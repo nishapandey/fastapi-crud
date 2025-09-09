@@ -16,7 +16,8 @@ source .venv/bin/activate
 pip install --upgrade pip
 
 # Install dependencies
-pip install -r app/requirements.txt
+#pip install -r app/requirements.txt
+pip install -r requirements.txt
 
 # Start uvicorn app
 echo "Starting FastAPI app on http://127.0.0.1:8000 ..."

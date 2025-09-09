@@ -1,4 +1,4 @@
-from typing import Optional
+"""from typing import Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from pydantic import BaseModel
 import time
@@ -37,15 +37,23 @@ class Post(BaseModel):
     id: Optional[int] = None
 
 
-@app.get("/posts")
+@app.get("/sqlalchemy/posts")
 def read_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts
 
 
+@app.get("/posts")
+def read_posts():
+    cursor.execute("SELECT * FROM posts")
+    posts = cursor.fetchall()
+    return posts
+
+
 @app.get("/posts/{id}")
-def read_post(id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+def read_post(id: int):
+    cursor.execute("SELECT * FROM posts WHERE id = %s", (id,))
+    post = cursor.fetchone()
     if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
@@ -54,35 +62,39 @@ def read_post(id: int, db: Session = Depends(get_db)):
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(post: Post):
-    new_post = models.Post(**post.dict())
-    db = next(get_db())
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
+    try:
+        cursor.execute(
+            """INSERT INTO posts (title, content, published) VALUES ( % s, % s, % s) RETURNING * """,
+            (post.title, post.content, post.published)
+        )
+        new_post = cursor.fetchone()
+        conn.commit()
+        return new_post
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-    if not post:
+def delete_post(id: int):
+    cursor.execute("DELETE FROM posts WHERE id = %s", (id,))
+    if cursor.rowcount == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-    db.delete(post)
-    db.commit()
+    conn.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put("/posts/{id}", status_code=status.HTTP_200_OK)
-def update_post(id: int, post: Post, db: Session = Depends(get_db)):
-    existing_post = db.query(models.Post).filter(models.Post.id == id).first()
-    if not existing_post:
+def update_post(id: int, post: Post):
+    cursor.execute(
+        "UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *",
+        (post.title, post.content, post.published, id)
+    )
+    updated_post = cursor.fetchone()
+    if not updated_post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-    update_data = post.dict(exclude_unset=True)
-    update_data.pop("id", None)  # Do not update the id field
-    for key, value in update_data.items():
-        setattr(existing_post, key, value)
-    db.commit()
-    db.refresh(existing_post)
-    return existing_post
+    conn.commit()
+    return updated_post
+    """
