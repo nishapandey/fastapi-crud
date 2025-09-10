@@ -15,15 +15,5 @@ class Post(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         server_default=text('now()'), nullable=False)
 
-
-class PostCreate(BaseModel):
-    title: str
-    content: str
-    published: Optional[bool] = True
-
-
-class PostResponse(PostCreate):
-    id: int
-
     class Config:
         orm_mode = True
