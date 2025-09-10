@@ -13,3 +13,6 @@ curl -X PUT "http://127.0.0.1:8000/posts/5" \
 curl -X GET "http://127.0.0.1:8000/posts/1"
 
 #documentation http://127.0.0.1:8000/docs
+
+#login
+curl -X POST "http://127.0.0.1:8000/login"   -H "Content-Type: application/json"   -d '{"email": "email@gmai.com", "password": "password123"}'
