@@ -19,3 +19,5 @@ curl -X POST "http://127.0.0.1:8000/users"   -H "Content-Type: application/json"
 
 #get
 curl -X GET "http://127.0.0.1:8000/users" 
+
+curl -X POST "http://127.0.0.1:8000/login"   -H "Content-Type: application/json"   -d '{"email": "email@gmail.com", "password": "password123"}'

@@ -20,5 +20,5 @@ pip install --upgrade pip
 pip install -r requirements.txt
 
 # Start uvicorn app
-echo "Starting FastAPI app on http://127.0.0.1:8000 ..."
-uvicorn app.main:app --reload --port 8000
+echo "Starting FastAPI app on http://127.0.0.1:8001 ..."
+uvicorn app.main:app --reload --port 8001
