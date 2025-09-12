@@ -22,13 +22,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-"""@router.get("/verify-password")
-def verify_user_password(plain_password: str, hashed_password: str):
-    is_valid = pwd_context.verify(plain_password, hashed_password)
-    return {"is_valid": is_valid}
-"""
-
-
 @router.get("", response_model=list[schemas.User])
 def read_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
